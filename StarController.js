@@ -1,5 +1,6 @@
 const BlockClass = require('./Block.js');
 const bitcoinMessage = require('bitcoinjs-message');
+const hex2ascii = require('hex2ascii')
 const BlockChain = require('./BlockChain.js');
 
 let myBlockChain = new BlockChain.Blockchain();
@@ -21,6 +22,7 @@ class StarController {
         this.getBlockByIndex();
         this.requestObject();
         this.addBlock();
+        this.getBlockByHeight();
     }
 
     /**
@@ -117,17 +119,29 @@ class StarController {
                 block.body.star = {};
                 block.body.star.dec = req.body.star.dec;
                 block.body.star.ra = req.body.star.ra;
-                block.body.star.story = req.body.star.story;
-                block.body.star.storyDecoded = Buffer(block.body.star.story).toString('hex');
+                block.body.star.story = Buffer(req.body.star.story).toString('hex');
 
                 myBlockChain.addBlock(block).then(() => {
-                    console.log('res is undefined.?' + res);
                     self.memPool[req.body.address] = undefined;
                     res.status(200).send(block);
                 });
             }
 
         });
+    }
+
+    getBlockByHeight() {
+        this.app.get("/block/:height", (req, res) => {
+            myBlockChain.getBlock(req.params.height).then((block) => {
+                block.body.star.storyDecoded = hex2ascii(block.body.star.story);
+                res.status(200).send(block);
+            }).catch(() => {
+                let body = {};
+                body.error = "the block not found.";
+                res.status(200).send(body);
+            })
+        });
+
     }
 
     isThisRequestisComingin5Minutes(address) {

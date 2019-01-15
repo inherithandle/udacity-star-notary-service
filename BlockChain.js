@@ -111,6 +111,9 @@ class Blockchain {
         });
     }
 
+    // TODO : get a block by a hash.
+    // TODO : get a block by a wallet address.
+
     // Validate Blockchain
     validateChain() {
         // Add your code here

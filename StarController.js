@@ -94,18 +94,6 @@ class StarController {
     addBlock() {
         let self = this;
         this.app.post("/block", (req, res) => {
-
-            /*
-            {
-                "address": "19xaiMqayaNrn3x7AjV5cU4Mk5f5prRVpL",
-                    "star": {
-                            "dec": "68° 52' 56.9",
-                            "ra": "16h 29m 1.0s",
-                            "story": "Found star using https://www.google.com/sky/"
-                    }
-            }
-            */
-
             var responseBody = {};
             // undefined 유닛 테스트?
             if (self.memPool[req.body.address] === undefined) {

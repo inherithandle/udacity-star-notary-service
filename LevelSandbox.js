@@ -64,7 +64,6 @@ class LevelSandbox {
                     block = JSON.parse(data);
                     if (block instanceof Object) {
                         if (block.hash == hash) {
-                            console.log('I found block.');
                             resolve(block);
                         }
                     }
@@ -74,11 +73,33 @@ class LevelSandbox {
                 })
                 .on('end', function () {
                     if (block == '') {
-                        console.log('not found block.');
                         let err = {};
                         err.notFound = true;
                         reject(err);
                     }
+                })
+        });
+
+    }
+
+    getBlocksByWalletAddress(address) {
+        let self = this;
+        let blocks = [];
+        return new Promise(function(resolve, reject) {
+            self.db.createValueStream()
+                .on('data', function (data) {
+                    let block = JSON.parse(data);
+                    if (block instanceof Object && block.body instanceof Object) {
+                        if (block.body.address == address) {
+                            blocks.push(block);
+                        }
+                    }
+                })
+                .on('error', function (err) {
+                    reject();
+                })
+                .on('end', function () {
+                    resolve(blocks);
                 })
         });
 

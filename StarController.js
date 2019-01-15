@@ -24,6 +24,7 @@ class StarController {
         this.addBlock();
         this.getBlockByHeight();
         this.getBlockByHash();
+        this.getBlocksByWalletAddress();
     }
 
     /**
@@ -149,12 +150,24 @@ class StarController {
         this.app.get("/stars/hash\::hash", (req, res) => {
             myBlockChain.getBlockByHash(req.params.hash).then(block => {
                 if (block instanceof Object) {
+                    block.body.star.storyDecoded = hex2ascii(block.body.star.story);
                     res.status(200).send(block);
                 } else {
                     let error = {};
                     error.error = "block not found";
                     res.status(200).send(error);
                 }
+            })
+        });
+    }
+
+    getBlocksByWalletAddress() {
+        this.app.get("/stars/address\::address", (req, res) => {
+            myBlockChain.getBlocksByWalletAddress(req.params.address).then(blocks => {
+                blocks.forEach(block => {
+                    block.body.star.storyDecoded = hex2ascii(block.body.star.story);
+                });
+                res.status(200).send(blocks);
             })
         });
     }

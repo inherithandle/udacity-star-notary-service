@@ -111,7 +111,12 @@ class Blockchain {
         });
     }
 
-    // TODO : get a block by a hash.
+    getBlockByHash(hash) {
+        return this.bd.getBlockByHash(hash).then((block) => {
+            return block;
+        });
+    }
+
     // TODO : get a block by a wallet address.
 
     // Validate Blockchain

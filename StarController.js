@@ -23,6 +23,7 @@ class StarController {
         this.requestObject();
         this.addBlock();
         this.getBlockByHeight();
+        this.getBlockByHash();
     }
 
     /**
@@ -142,6 +143,20 @@ class StarController {
             })
         });
 
+    }
+
+    getBlockByHash() {
+        this.app.get("/stars/hash\::hash", (req, res) => {
+            myBlockChain.getBlockByHash(req.params.hash).then(block => {
+                if (block instanceof Object) {
+                    res.status(200).send(block);
+                } else {
+                    let error = {};
+                    error.error = "block not found";
+                    res.status(200).send(error);
+                }
+            })
+        });
     }
 
     isThisRequestisComingin5Minutes(address) {

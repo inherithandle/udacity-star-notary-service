@@ -3,11 +3,14 @@
 |  ===============================================*/
 
 class Block {
-	constructor(data){
-		this.hash = "";
-		this.height = 0;
-		this.body = data;
-		this.time = new Date().getTime().toString().slice(0,-3);
+	constructor(body){
+		// Add your Block properties
+		// Example: this.hash = "";
+		this.height = '';
+		this.timeStamp = '';
+		this.body = body;
+		this.previousHash = '0x';
+		this.hash = '';
 	}
 }
 

@@ -1,7 +1,8 @@
-const SHA256 = require('crypto-js/sha256');
 const BlockClass = require('./Block.js');
-const bitcoinMessage = require('bitcoinjs-message')
+const bitcoinMessage = require('bitcoinjs-message');
+const BlockChain = require('./BlockChain.js');
 
+let myBlockChain = new BlockChain.Blockchain();
 /**
  * Controller Definition to encapsulate routes to work with blocks
  */
@@ -19,6 +20,7 @@ class StarController {
         this.requestValidation();
         this.getBlockByIndex();
         this.requestObject();
+        this.addBlock();
     }
 
     /**
@@ -82,6 +84,49 @@ class StarController {
             }
 
             res.status(200).send(responseBody);
+        });
+    }
+
+    addBlock() {
+        let self = this;
+        this.app.post("/block", (req, res) => {
+
+            /*
+            {
+                "address": "19xaiMqayaNrn3x7AjV5cU4Mk5f5prRVpL",
+                    "star": {
+                            "dec": "68° 52' 56.9",
+                            "ra": "16h 29m 1.0s",
+                            "story": "Found star using https://www.google.com/sky/"
+                    }
+            }
+            */
+
+            var responseBody = {};
+            // undefined 유닛 테스트?
+            if (self.memPool[req.body.address] === undefined) {
+                responseBody.error = 'First you have to consume /requestValidation';
+                res.status(200).send(responseBody);
+            } else if (!self.memPool[req.body.address].messageSignature) {
+                responseBody.error = 'you have to validate your request with your signature.';
+                res.status(200).send(responseBody);
+            } else {
+                let block = {};
+                block.body = {};
+                block.body.address = req.body.address;
+                block.body.star = {};
+                block.body.star.dec = req.body.star.dec;
+                block.body.star.ra = req.body.star.ra;
+                block.body.star.story = req.body.star.story;
+                block.body.star.storyDecoded = Buffer(block.body.star.story).toString('hex');
+
+                myBlockChain.addBlock(block).then(() => {
+                    console.log('res is undefined.?' + res);
+                    self.memPool[req.body.address] = undefined;
+                    res.status(200).send(block);
+                });
+            }
+
         });
     }
 

@@ -19,7 +19,6 @@ class StarController {
         this.memPool = [];
         this.timeoutRequests = {};
         this.requestValidation();
-        this.getBlockByIndex();
         this.requestObject();
         this.addBlock();
         this.getBlockByHeight();
@@ -27,36 +26,24 @@ class StarController {
         this.getBlocksByWalletAddress();
     }
 
-    /**
-     * Implement a GET Endpoint to retrieve a block by index, url: "/api/block/:index"
-     */
-    getBlockByIndex() {
-        let self = this;
-        this.app.get("/api/block/:index", (req, res) => {
-            let data = {};
-            if (req.params.index < 0 || req.params.index >= self.blocks.length) {
-                console.log('error');
-                data['error'] = 'index out of bound';
-            } else {
-                data = self.blocks[req.params.index];
-            }
-            res.status(200).send(data);
-
-        });
-    }
-
     requestValidation() {
         let self = this;
         this.app.post("/requestValidation", (req, res) => {
-            self.memPool[req.body.address] = {};
-            self.memPool[req.body.address].walletAddress = req.body.address;
-            self.memPool[req.body.address].validationWindow = 300;
-            self.memPool[req.body.address].requestTimeStamp = new Date().getTime().toString().slice(0,-3);
-            self.memPool[req.body.address].message = `${self.memPool[req.body.address].walletAddress}:${self.memPool[req.body.address].requestTimeStamp}:starRegistry`;
-            self.timeoutRequests[req.body.address] = setTimeout( function() {
-                console.log(`the request from ${req.body.address} is timed out!`);
-                self.memPool[req.body.address] = undefined;
-            }, 300 * 1000 );
+            if (self.memPool[req.body.address] instanceof Object) {
+                let timeElapse = (new Date().getTime().toString().slice(0,-3)) - self.memPool[req.body.address].requestTimeStamp;
+                let timeLeft = 300 - timeElapse;
+                self.memPool[req.body.address].validationWindow = timeLeft;
+            } else {
+                self.memPool[req.body.address] = {};
+                self.memPool[req.body.address].walletAddress = req.body.address;
+                self.memPool[req.body.address].validationWindow = 300;
+                self.memPool[req.body.address].requestTimeStamp = new Date().getTime().toString().slice(0,-3);
+                self.memPool[req.body.address].message = `${self.memPool[req.body.address].walletAddress}:${self.memPool[req.body.address].requestTimeStamp}:starRegistry`;
+                self.timeoutRequests[req.body.address] = setTimeout( function() {
+                    console.log(`the request from ${req.body.address} is timed out!`);
+                    self.memPool[req.body.address] = undefined;
+                }, 300 * 1000 );
+            }
             res.status(200).send(self.memPool[req.body.address]);
         });
     }
